@@ -146,6 +146,17 @@ Generates **runnable microcosms** of real-world industry systems — complete, s
 
 ---
 
+## 📊 Applications — built on the stack
+
+### [Bossy](https://github.com/ProjAnvil/Bossy)
+*A self-hosted, privacy-first ChatBI platform.*
+
+Ask questions in plain language and get SQL, tables, and charts over your own databases — without your data ever leaving your infrastructure. Bring-your-own-LLM (a fully local model via Ollama, or any OpenAI-/Anthropic-compatible endpoint), a rule-based semantic layer, SQL guard, and EXPLAIN-based cost gate keep the deterministic parts predictable, while an 8-role LLM agent pipeline (intent, planning, SQL gen/rewrite, insight, …) handles the rest. Python/FastAPI backend + Next.js frontend, ships with a synthetic banking demo dataset generated with Faker.
+
+> **Why:** The best proof of an agent stack is a real product built on it. Bossy shows the toolkit paying off end-to-end — a working, self-hosted ChatBI app where your data never has to leave your infrastructure.
+
+---
+
 ## 🤝 How a team uses it together
 
 **The human** does what humans do best — *intent and judgment*:
@@ -197,6 +208,7 @@ ProjAnvil is that infrastructure, built in the open, MIT-licensed, and dogfooded
 | [langchain-golang](https://github.com/ProjAnvil/langchain-golang) | 🧱 Foundation | Go          | Community Go port of LangChain                      |
 | [Belt](https://github.com/ProjAnvil/Belt)                    | 🔧 Tooling    | Python      | Scaffolds AI-native apps for Claude Code            |
 | [Jiade](https://github.com/ProjAnvil/Jiade)                  | 🔧 Tooling    | Go          | Generates runnable miniature industry systems       |
+| [Bossy](https://github.com/ProjAnvil/Bossy)                  | 📊 Application | Python · TypeScript | Self-hosted, privacy-first natural-language BI over your databases |
 
 <div align="center">
 
