@@ -48,7 +48,7 @@ We discovered that filling these three axes — with **quality over quantity** �
 
 ## 🏛️ The architecture at a glance
 
-A complete pipeline for agent-era development: **intent → knowledge → context → execution.** Each layer has one job and does it well.
+A complete pipeline for agent-era development — **intent → knowledge → context → execution** — plus a memory layer that recalls it all instead of re-reading. Each layer has one job and does it well.
 
 ```mermaid
 flowchart TB
@@ -63,6 +63,9 @@ flowchart TB
     subgraph Context["🔌 Context Layer"]
         Knot["<b>Knot</b><br/>API docs ↔ MCP server"]
     end
+    subgraph Memory["🧬 Memory Layer"]
+        LadyM["<b>LadyM</b><br/>recall ↔ consolidate · 6 tiers"]
+    end
     subgraph Skill["🧠 Skill Layer"]
         MindForge["<b>MindForge</b><br/>9 agents + 17 skills"]
     end
@@ -72,8 +75,10 @@ flowchart TB
     Human -->|API defs| Knot
     SCV -->|patterns & conventions| Porto
     Knot -.->|API contracts via MCP| Porto
+    SCV -.->|code symbols & facts| LadyM
     MindForge -.->|empowers every stage| Porto
     Porto -->|engineering specs| AgentExec(["🤖 Agent executes<br/>with MindForge + SCV + Knot"])
+    AgentExec <-->|recall ↔ record episodes| LadyM
     AgentExec --> Shipped(["🚀 Shipped code"])
 ```
 
@@ -108,6 +113,14 @@ Porto doesn't hallucinate boilerplate. It retrieves context from an SCV-built kn
 Knot organizes endpoints into searchable, Markdown-rich groups with drag-and-drop ordering, fuzzy search, and JSON highlighting. Its distinguishing trick is a built-in **MCP server**: Claude can list groups, search APIs, pull detailed docs, and generate request/response examples through natural language. Go backend + Svelte 5 frontend compiled into **a single zero-dependency binary**, with SQLite / PostgreSQL / MySQL backends.
 
 > **Why:** API docs that only render in a browser are dead weight in the agent era. If an agent can't query your contracts, it can't integrate with them.
+
+### 🧬 Memory Layer — [LadyM](https://github.com/ProjAnvil/LadyM)
+
+*A brain-inspired, multi-tier memory that lets an agent **recall** workspace knowledge with one keyword — instead of re-`Read`-ing and re-`Grep`-ing the same files every turn.*
+
+Today's coding agents have no long-term memory: every turn they rediscover the same symbols and burn the context window on rediscovery. LadyM caches the workspace's *understanding* — code analysis, decisions, skills, and episodes — into a hierarchical, consolidating, decaying memory any agent can recall through a single keyword. Its distinctive bet is **fusing codebase RAG into a brain-inspired memory**: L2 stores tree-sitter code symbols and plain facts in *one* store, scored by one ACT-R activation function — memory and codebase search are one system, not two. L0–L4 form the online store (working / episodic / semantic / procedural / associative); a System 2 worker asynchronously distills **L5 mental models** and **L6 forward intents**, with a `supersedes` chain so memories *evolve* instead of piling up. Local-first by default — `HashingEmbedding` + SQLite + `sqlite-vec`, **no network, no model download, no API key** to start. Exposed via **MCP server, Claude Code Skill, Python SDK, and CLI**, all calling the same engine; the read path is heuristic-only, so recall stays fast and predictable. 267 tests, fully offline.
+
+> **Why:** An agent that re-discovers your codebase every turn is an amnesiac wearing a nametag. Memory is what turns a one-shot assistant into a teammate that gets smarter the longer it works in your repo.
 
 ---
 
@@ -161,27 +174,27 @@ Ask questions in plain language and get SQL, tables, and charts over your own da
 **The agent** does the rest — *execution* — equipped with all three axes filled:
 
 ```
-        ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
-        │  MindForge  │  │     SCV     │  │   Knot MCP  │
-        │  domain     │  │  code       │  │  API        │
-        │  expertise  │  │  knowledge  │  │  contracts  │
-        └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
-               └────────────────┼────────────────┘
-                                ▼
-                    ┌─────────────────────┐
-                    │  Understands the    │
-                    │  spec → writes code │
-                    │  → reviews → tests  │
-                    └─────────────────────┘
+        ┌─────────────┐  ┌─────────────┐  ┌─────────────┐  ┌─────────────┐
+        │  MindForge  │  │     SCV     │  │   Knot MCP  │  │    LadyM    │
+        │  domain     │  │  code       │  │  API        │  │  evolving   │
+        │  expertise  │  │  knowledge  │  │  contracts  │  │   memory    │
+        └──────┬──────┘  └──────┬──────┘  └──────┬──────┘  └──────┬──────┘
+               └────────────────┼────────────────┼────────────────┘
+                                        ▼
+                            ┌─────────────────────┐
+                            │  Understands the    │
+                            │  spec → writes code │
+                            │  → reviews → tests  │
+                            └─────────────────────┘
 ```
 
-The result: specs stop being guesswork, code stops reinventing your conventions, and APIs stop being invisible to the agent writing against them.
+The result: specs stop being guesswork, code stops reinventing your conventions, APIs stop being invisible to the agent writing against them, and nothing the agent learned last turn has to be rediscovered.
 
 ---
 
 ## 🎯 Why we built ProjAnvil
 
-We kept watching talented teams adopt coding agents and hit the same three walls: **the agent didn't know their domain, didn't know their codebase, and couldn't reach their systems.** Most "AI productivity" effort goes into prompting. We think the bigger leverage is in **infrastructure** — filling the Skill, Knowledge, and Context axes so any agent becomes dramatically more useful, immediately.
+We kept watching talented teams adopt coding agents and hit the same three walls: **the agent didn't know their domain, didn't know their codebase, and couldn't reach their systems.** Most "AI productivity" effort goes into prompting. We think the bigger leverage is in **infrastructure** — filling the Skill, Knowledge, Context, and Memory axes so any agent becomes dramatically more useful, immediately.
 
 ProjAnvil is that infrastructure, built in the open, MIT-licensed, and dogfooded on every project we ship. We're betting that the teams who win the next decade won't be the ones with the most coders — they'll be the ones with the **deepest, most proprietary agent configurations**.
 
@@ -195,6 +208,7 @@ ProjAnvil is that infrastructure, built in the open, MIT-licensed, and dogfooded
 | [SCV](https://github.com/ProjAnvil/SCV) | 📚 Knowledge | Python | Codebase → 4 structured, AI-readable documents |
 | [Porto](https://github.com/ProjAnvil/Porto) | 🎯 Intent | Python | PRD → grounded, self-refining engineering specs |
 | [Knot](https://github.com/ProjAnvil/Knot) | 🔌 Context | Go · Svelte | API docs hub with a built-in MCP server |
+| [LadyM](https://github.com/ProjAnvil/LadyM) | 🧬 Memory | Python | Brain-inspired multi-tier memory + codebase RAG |
 | [claude-agent-sdk-golang](https://github.com/ProjAnvil/claude-agent-sdk-golang) | 🧱 Foundation | Go | Go port of Anthropic's Claude Agent SDK |
 | [langchain-golang](https://github.com/ProjAnvil/langchain-golang) | 🧱 Foundation | Go | Community Go port of LangChain |
 | [Belt](https://github.com/ProjAnvil/Belt) | 🔧 Tooling | Python | Scaffolds AI-native apps for Claude Code |
